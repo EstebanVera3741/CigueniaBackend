@@ -1,3 +1,3 @@
-FROM amazoncoretto:20.0.1-alpine-jdk
+FROM amazoncorretto:latest
 COPY gradle/wrapper/gradle-wrapper.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
