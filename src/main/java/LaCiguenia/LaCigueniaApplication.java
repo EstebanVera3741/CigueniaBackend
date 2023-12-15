@@ -29,7 +29,7 @@ public class LaCigueniaApplication {
 	Contacto:
 	        +57 3103302209 - +57 3226640119					**/
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		SpringApplication.run(LaCigueniaApplication.class, args);
 	}
 }
