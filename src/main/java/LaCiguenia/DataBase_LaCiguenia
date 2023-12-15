@@ -1,0 +1,325 @@
+CREATE DATABASE la_ciguenia;
+
+USE la_ciguenia;
+
+CREATE TABLE user_ciguenia (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_name VARCHAR(100),
+    user_email VARCHAR(100),
+    user_password VARCHAR(100),
+    user_status VARCHAR(20)
+);
+CREATE TABLE store_ciguenia (
+    store_id INT PRIMARY KEY AUTO_INCREMENT,
+    store_name VARCHAR(100),
+    store_number_nit VARCHAR(15),
+    store_type VARCHAR(50),
+    store_phone_number VARCHAR(20),
+    store_email VARCHAR(100),
+    store_code_ciiu VARCHAR(10),
+    store_city VARCHAR(20),
+    store_address VARCHAR(100),
+    store_status VARCHAR(20)
+);
+CREATE TABLE opening_ciguenia (
+    opening_id INT AUTO_INCREMENT PRIMARY KEY,
+    opening_date DATE,
+    opening_total DOUBLE,
+    store_id INT,
+	FOREIGN KEY (store_id) REFERENCES store_ciguenia (store_id)
+);
+CREATE TABLE category_ciguenia (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(50),
+    category_description VARCHAR(100),
+    category_status VARCHAR(15)
+);
+CREATE TABLE product_ciguenia (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(100),
+    product_price DOUBLE,
+    product_iva DOUBLE,
+    product_cost DOUBLE,
+    product_description VARCHAR(100),
+    product_status VARCHAR(20),
+    category_id INT,
+    FOREIGN KEY (category_id) REFERENCES category_ciguenia (category_id)
+);
+CREATE TABLE inventory_ciguenia (
+    inventory_id INT PRIMARY KEY AUTO_INCREMENT,
+    inventory_amount INT,
+    inventory_entry_date DATE,
+	product_id INT,
+    FOREIGN KEY (product_id) REFERENCES product_ciguenia(product_id)
+);
+CREATE TABLE material_ciguenia (
+    material_id INT PRIMARY KEY AUTO_INCREMENT,
+    material_name VARCHAR(50),
+    material_description VARCHAR(100),
+    product_id INT,
+    FOREIGN KEY (product_id) REFERENCES product_ciguenia(product_id)
+);
+CREATE TABLE customer_ciguenia (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100),
+    customer_identification VARCHAR(50),
+    customer_phone_number VARCHAR(20),
+    customer_email VARCHAR(100),
+    customer_address VARCHAR(100)
+);
+CREATE TABLE payment_method_ciguenia(
+    payment_method_id INT PRIMARY KEY AUTO_INCREMENT,
+    payment_method_name VARCHAR(50),
+    payment_method_description VARCHAR(100),
+    payment_method_status VARCHAR(10)
+);
+CREATE TABLE invoice_ciguenia (
+    invoice_id INT PRIMARY KEY AUTO_INCREMENT,
+    invoice_date DATE,
+    invoice_iva INT,
+    invoice_total DOUBLE,
+    invoice_status VARCHAR(20),
+    customer_id INT,
+    opening_id INT,
+    payment_method_id INT,
+    FOREIGN KEY (customer_id) REFERENCES customer_ciguenia (customer_id),
+	FOREIGN KEY (opening_id) REFERENCES opening_ciguenia (opening_id),
+	FOREIGN KEY (payment_method_id) REFERENCES payment_method_ciguenia (payment_method_id)
+);
+CREATE TABLE detail_invoice_ciguenia (
+    detail_id INT PRIMARY KEY AUTO_INCREMENT,
+    detail_amount INT,
+    detail_subtotal DOUBLE,
+    product_id INT,
+    invoice_id INT,
+    FOREIGN KEY (product_id) REFERENCES product_ciguenia (product_id),
+    FOREIGN KEY (invoice_id) REFERENCES invoice_ciguenia (invoice_id)
+);
+CREATE TABLE cash_closure_ciguenia (
+    cash_closure_id INT PRIMARY KEY AUTO_INCREMENT,
+    cash_closure_date DATE,
+    cash_closure_store VARCHAR(50),
+    cash_closure_number INT,
+    cash_closure_total_closure DOUBLE,
+    cash_closure_total_opening_box DOUBLE,
+    cash_closure_total_method_pay DOUBLE,
+    cash_closure_total_expense DOUBLE,
+    cash_closure_total_cash_box DOUBLE,
+    cash_closure_difference DOUBLE,
+    opening_id INT,
+    FOREIGN KEY (opening_id) REFERENCES opening_ciguenia(opening_id)
+);
+CREATE TABLE expense_ciguenia (
+    expense_id INT PRIMARY KEY AUTO_INCREMENT,
+    expense_date DATE,
+    expense_number_invoice VARCHAR(50),
+    expense_supplier_location VARCHAR(50),
+    expense_value INT,
+    expense_description VARCHAR (150),
+    expense_status VARCHAR(50),
+    opening_id INT,
+    payment_method_id INT,
+	FOREIGN KEY (payment_method_id) REFERENCES payment_method_ciguenia(payment_method_id),
+    FOREIGN KEY (opening_id) REFERENCES opening_ciguenia(opening_id)
+);
+CREATE TABLE supplier_ciguenia (
+    supplier_id INT PRIMARY KEY AUTO_INCREMENT,
+    supplier_name VARCHAR(100),
+    supplier_nit VARCHAR(20),
+    supplier_number_phone VARCHAR(20),
+    supplier_email VARCHAR(150),
+    supplier_address VARCHAR(100),
+    supplier_city VARCHAR(80),
+    supplier_status VARCHAR(10)
+);
+
+-- Registro Categorias
+INSERT INTO category_ciguenia (category_name, category_description, category_status)
+VALUES
+	('General', 'Categoria Especial', 'Activa'),
+	('General', 'Categoria Especial para todos los productos', 'Activa');
+
+-- Registro Cliente
+INSERT INTO customer_ciguenia (customer_name, customer_identification, customer_phone_number, customer_email, customer_address)
+VALUES ('Cliente General', '123456789', '3001101010', 'general@example.com', 'Calle Principal 123');
+
+-- Registro Usuario
+INSERT INTO user_ciguenia (user_name, user_email, user_password, user_status)
+VALUES ('United Nations Security Code', 'unsc@gmail.com', 'dW5zYzEyMw==', 'Habilitado');
+
+-- Registro Metodo de Pago
+INSERT INTO payment_method_ciguenia (payment_method_name, payment_method_description, payment_method_status)
+VALUES ('Efectivo', 'Metodo de pago General', 'Activo');
+
+-- Registro Almacen
+INSERT INTO store_ciguenia (store_name, store_number_nit, store_type, store_phone_number, store_email, store_code_ciiu, store_city, store_address, store_status)
+VALUES ('General', '123456789', 'General', '3003003030', 'general@example.com', '0000', 'Ibague', 'Calle Principal 123', 'Habilitado');
+
+
+
+---------------------------------------------------------------------------------------------------
+--------------------------------------    Query Especiales  ---------------------------------------
+---------------------------------------------------------------------------------------------------
+
+
+
+            -------------------- Query Retornar el Id de la factura
+            ---------------------------------------------------------------------------------------------------
+SELECT MAX(invoice_id) AS end_id FROM invoice_ciguenia;
+
+            -------------------- Query Cantidad Inventario por Producto
+            ---------------------------------------------------------------------------------------------------
+SELECT pc.product_name, ic.inventory_amount
+FROM product_ciguenia pc
+INNER JOIN inventory_ciguenia ic ON pc.inventory_id = ic.inventory_id
+WHERE pc.product_id = 3;
+
+            -------------------- Query Total Ventas por Mes
+            ---------------------------------------------------------------------------------------------------
+SELECT SUM(expense_value) AS total_gastos
+FROM expense_ciguenia
+WHERE YEAR(expense_date) = YEAR(CURRENT_DATE) AND MONTH(expense_date) = MONTH(CURRENT_DATE);
+
+            -------------------- Query Total Ventas por día en Efectivo
+            ---------------------------------------------------------------------------------------------------
+SELECT SUM(ec.expense_value)
+FROM expense_ciguenia ec
+JOIN opening_ciguenia op ON ec.opening_id = op.opening_id
+WHERE ec.payment_method_id = 1
+AND op.opening_id = (SELECT MAX(opening_id) FROM opening_ciguenia);
+
+            -------------------- Query Total Ventas por día
+            ---------------------------------------------------------------------------------------------------
+SELECT SUM(i.expense_value) FROM expense_ciguenia i
+LEFT JOIN cash_closure_ciguenia c ON i.opening_id = c.opening_id
+WHERE c.opening_id IS NULL ORDER BY i.opening_id DESC;
+
+            -------------------- Query ListProductos por Categoria
+            ---------------------------------------------------------------------------------------------------
+SELECT c.category_name, p.product_id, p.product_name, p.product_price, p.product_description
+FROM category_ciguenia c
+JOIN product_ciguenia p ON c.category_id = p.category_id
+WHERE c.category_id = 2;
+
+            -------------------- Query Ventas del Dia
+            ---------------------------------------------------------------------------------------------------
+SELECT * FROM invoice_ciguenia WHERE invoice_date = '?' LIMIT 4;
+
+            -------------------- Query Total Ventas del Mes
+            ---------------------------------------------------------------------------------------------------
+SELECT SUM(invoice_total) AS invoice_id
+FROM invoice_ciguenia
+WHERE YEAR (invoice_date) = 2023 AND MONTH (invoice_date) = 8;
+
+            -------------------- Query Total Facturas del Mes
+            ---------------------------------------------------------------------------------------------------
+SELECT COUNT(*) AS invoice_id
+FROM invoice_ciguenia
+WHERE YEAR(invoice_date) = 2023 AND MONTH(invoice_date) = 8;
+
+            -------------------- Query Gastos Totales del Mes
+            ---------------------------------------------------------------------------------------------------
+SELECT SUM(invoice_total) AS invoice_iva
+FROM invoice_ciguenia
+WHERE MONTH(invoice_date) = 8 AND YEAR(invoice_date) = 2023;
+(falta reemplazar la tabla “invoice” por una que indique el presupuesto del inventario con los proveedores).
+
+            -------------------- Query Utilidad Total del Mes
+            ---------------------------------------------------------------------------------------------------
+SELECT (SELECT COALESCE(SUM(invoice_total), 0)
+FROM invoice_ciguenia
+WHERE MONTH(invoice_date) = 8 AND YEAR(invoice_date) = 2023)
+(SELECT COALESCE(SUM(invoice_total), 0)
+FROM invoice_ciguenia
+WHERE MONTH(invoice_date) = 8 AND YEAR(invoice_date) = 2023)
+AS invoice_ciguenia;
+(Aplicar el mismo requisito que la anterior Query)
+
+            -------------------- Query Producto Recientemente Registrados
+            ---------------------------------------------------------------------------------------------------
+SELECT *
+FROM product_ciguenia
+WHERE product_status = 'Habilitado'
+ORDER BY product_id DESC
+LIMIT 3;
+
+            -------------------- Query Lista de Productos por Categoria
+            ---------------------------------------------------------------------------------------------------
+SELECT pc.*
+FROM product_ciguenia pc
+JOIN category_ciguenia cc ON pc.category_id = cc.category_id
+WHERE cc.category_id = 6
+AND pc.product_status = 'Habilitado';
+
+            -------------------- Query Seleccionar Todas las Facturas y Clientes
+            ---------------------------------------------------------------------------------------------------
+SELECT c.*, i.*
+FROM customer_ciguenia c
+JOIN invoice_ciguenia i ON c.customer_id = i.customer_id
+ORDER BY c.customer_id, i.invoice_id;
+
+            -------------------- Query Total Ventas de la Facturacion del Dia Anterior
+            ---------------------------------------------------------------------------------------------------
+SELECT SUM(invoice_total) AS totalInvoice
+FROM invoice_ciguenia
+WHERE invoice_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+
+            -------------------- Query Seleccionar Los Productos Habilitados de un Inventario
+            ---------------------------------------------------------------------------------------------------
+SELECT i.*
+FROM inventory_ciguenia i
+INNER JOIN product_ciguenia p ON i.product_id = p.product_id
+WHERE p.product_status = 'habilitado';
+
+            -------------------- Query Seleccionar La ultima Apertura de Caja
+            ---------------------------------------------------------------------------------------------------
+SELECT *
+FROM opening_ciguenia
+ORDER BY opening_id DESC
+LIMIT 1;
+
+            -------------------- Query Seleccionar el Ultimo Cierre de Caja
+            ---------------------------------------------------------------------------------------------------
+SELECT *
+FROM cash_closure_ciguenia
+ORDER BY cash_closure_id DESC
+LIMIT 1;
+
+            -------------------- Query Seleccionar Maximo 3 Productos Habilitados
+            ---------------------------------------------------------------------------------------------------
+SELECT *
+FROM product_ciguenia
+WHERE product_status = 'Habilitado'
+ORDER BY product_id DESC
+LIMIT 3;
+
+            -------------------- Query Productos Mas Vendidos del Dia
+            ---------------------------------------------------------------------------------------------------
+SELECT p.product_id AS productId, p.product_name AS productName, p.product_price AS productPrice,
+p.product_description AS productDescription, p.category_id AS categoryId, ct.category_name AS categoryName,
+IFNULL(SUM(di.detail_amount), 0) AS totalDetailAmount, IFNULL(iq.inventory_amount, 0) AS inventoryAmount
+FROM product_ciguenia p
+LEFT JOIN detail_invoice_ciguenia di ON p.product_id = di.product_id
+LEFT JOIN invoice_ciguenia i ON di.invoice_id = i.invoice_id AND DATE(i.invoice_date) = CURDATE()
+LEFT JOIN category_ciguenia ct ON p.category_id = ct.category_id
+LEFT JOIN (SELECT product_id, SUM(inventory_amount) AS inventory_amount FROM inventory_ciguenia
+GROUP BY product_id ) AS iq ON p.product_id = iq.product_id
+WHERE p.product_status = 'Habilitado'
+GROUP BY p.product_id, p.product_name, p.product_price, p.product_iva, p.product_cost,
+p.product_description, p.product_status, p.category_id
+ORDER BY totalDetailAmount DESC
+LIMIT 4;
+
+            -------------------- Query Detalles Facturacion, Cliente Productos
+            ---------------------------------------------------------------------------------------------------
+SELECT ic.invoice_id AS invoiceId, ic.invoice_date AS invoiceDate,
+cc.customer_name AS customerName, cc.customer_identification AS customerIdentification,
+cc.customer_phone_number AS customerPhone, cc.customer_email AS customerEmail,
+pc.product_name AS productName, pc.product_price AS productPrice, di.detail_amount AS detailAmount,
+di.detail_subtotal AS detailSubtotal, pc.product_iva AS productIva,
+ic.invoice_iva AS invoiceIva, ic.invoice_total AS invoiceTotal, pmc.payment_method_name AS invoicePay
+FROM invoice_ciguenia ic JOIN customer_ciguenia cc ON ic.customer_id = cc.customer_id
+JOIN detail_invoice_ciguenia di ON ic.invoice_id = di.invoice_id
+JOIN product_ciguenia pc ON di.product_id = pc.product_id
+JOIN payment_method_ciguenia pmc ON pmc.payment_method_id = ic.payment_method_id
+WHERE ic.invoice_id = 1;
